@@ -11,11 +11,10 @@ async function send() {
     });
 
     const data = await res.json();
-    console.log(data);
 
     document.getElementById("chat").innerHTML += `
         <p><b>Você:</b> ${input.value}</p>
-        <p><b>IA:</b> ${data}</p>
+        <p><b>IA:</b> ${data.response}</p>
     `;
 
     input.value = "";
