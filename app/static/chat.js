@@ -19,6 +19,8 @@ async function send() {
     // Limpa o campo de texto para o usuário poder digitar a próxima mensagem
     input.value = "";
 
+    const loadingDiv = appendMessage("IA", "Pensando...", "ai-msg", "loading");
+    
     // Inicia um bloco try/catch para tratar possíveis erros de conexão com a API
     try {
         // Faz a requisição POST para a rota /chat do seu FastAPI e espera (await) a resposta
@@ -33,7 +35,8 @@ async function send() {
         
         // 2. Chama a função auxiliar para desenhar a resposta da IA na tela
         // Usamos a classe "ai-msg" para podermos estilizar a bolha da IA diferente da do usuário
-        appendMessage("IA", data.response, "ai-msg");
+        loadingDiv.textContent = `IA: ${data.response}`;
+        loadingDiv.classList.remove("loading");
 
     } catch (error) {
         // Se houver algum erro de rede ou o servidor cair, cai aqui e exibe uma mensagem de erro
@@ -42,7 +45,7 @@ async function send() {
 }
 
 // Função auxiliar que recebe o nome do remetente, o texto e a classe CSS para o balão
-function appendMessage(sender, text, className) {
+function appendMessage(sender, text, ...classNames) {
     // Busca novamente o container principal do chat
     const chat = document.getElementById("chat");
     
@@ -51,15 +54,18 @@ function appendMessage(sender, text, className) {
 
     // Adiciona as classes CSS a essa div. 
     // Ficará algo como: class="chat-bubble user-msg" ou class="chat-bubble ai-msg"
-    msgDiv.classList.add("chat-bubble", className);
+    msgDiv.classList.add("chat-bubble");
     
-    // Define o texto dentro da div de forma segura. 
-    // O .textContent garante que o texto seja tratado como texto puro, evitando falhas de segurança (XSS)
+    // O operador ... permite adicionar múltiplos nomes de classe
+    classNames.forEach(cls => {
+        // Se a string contiver espaços (ex: "ai-msg loading"), divide e adiciona cada uma
+        cls.split(" ").filter(Boolean).forEach(c => msgDiv.classList.add(c));
+    });
+
     msgDiv.textContent = `${sender}: ${text}`;
     
-    // Anexa a nova div como filha dentro do container principal do chat (coloca ela no final da lista)
     chat.appendChild(msgDiv);
-    
-    // Faz o container do chat rolar automaticamente até o fundo para mostrar a mensagem mais recente
     chat.scrollTop = chat.scrollHeight;
+
+    return msgDiv; 
 }
