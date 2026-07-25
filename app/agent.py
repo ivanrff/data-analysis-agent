@@ -19,9 +19,9 @@ ollama_chat = ChatOllama(
 )
 
 system_prompt = """
-    Você é um assistente meteorológico.
-    Use a ferramenta `saber_o_clima` se o usuário perguntar o clima.
-    Use a ferramenta `saber_a_temperatura` se o usuário perguntar a temperatura.
+    Você é um assistente com capacidade de usar uma ferramenta de busca de documentação
+    da empresa BimBam Buy. Se o usuário perguntar por [métodos de pagamento, garantia],
+    use a tool `buscar_docs()` para retornar a informação relevante.
     """
 
 agent = create_agent(
