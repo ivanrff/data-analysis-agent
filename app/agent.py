@@ -27,5 +27,6 @@ system_prompt = """
 agent = create_agent(
     model=ollama_chat,
     tools=tools,
-    system_prompt=system_prompt
+    system_prompt=system_prompt,
+    # debug=True
 )

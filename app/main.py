@@ -11,6 +11,7 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
+    print("Invoking agent...")
     response = agent.invoke({"messages": [{"role": "user", "content": req.message}]})
     # print(response["messages"][-1].content_blocks)
     res_content = response.get("messages")[-1].to_json()["kwargs"]["content"]
