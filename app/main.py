@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from app.agent import agent
@@ -11,11 +12,19 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
-    print("Invoking agent...")
-    response = agent.invoke({"messages": [{"role": "user", "content": req.message}]})
-    # print(response["messages"][-1].content_blocks)
-    res_content = response.get("messages")[-1].to_json()["kwargs"]["content"]
-    return {"response": res_content}
+    async def event_generator():
+        # Usa a API de streaming assíncrona do agente
+        stream = await agent.astream_events(
+            {"messages": [{"role": "user", "content": req.message}]},
+            version="v3"
+        )
+        # Itera sobre as mensagens geradas pelo modelo em tempo real
+        async for message in stream.messages:
+            async for delta in message.text:
+                if delta:
+                    # Envia cada pedaço (chunk) de texto para o cliente
+                    yield delta
+
+    return StreamingResponse(event_generator(), media_type="text/plain; charset=utf-8")
 
 app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
-# uv run uvicorn app.main:app --reload
