@@ -5,11 +5,11 @@ async function send() {
 
     if (!userMessage) return;
 
-    appendMessage("You", userMessage, "user-msg");
+    appendMessage("Você", userMessage, "user-msg");
     input.value = "";
 
     // Create initial AI bubble indicating loading state
-    const loadingDiv = appendMessage("AI", "Thinking...", "ai-msg", "loading");
+    const loadingDiv = appendMessage("AI", "Pensando...", "ai-msg", "loading");
     
     try {
         const res = await fetch("/chat", {
@@ -18,7 +18,7 @@ async function send() {
             body: JSON.stringify({ message: userMessage })
         });
 
-        if (!res.ok) throw new Error("Network failure");
+        if (!res.ok) throw new Error("Erro de conexão com o servidor.");
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -45,7 +45,7 @@ async function send() {
         }
 
     } catch (error) {
-        loadingDiv.textContent = "Error: Failed to communicate with the server.";
+        loadingDiv.textContent = "Error: Falha na conexão com o servidor.";
         loadingDiv.classList.remove("loading");
         loadingDiv.classList.add("error-msg");
     }
