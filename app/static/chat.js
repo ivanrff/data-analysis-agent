@@ -2,6 +2,7 @@
 async function send() {
     const input = document.getElementById("msg");
     const userMessage = input.value.trim();
+    const AIName = "IA"; // You can change this to any name you want for the AI
 
     if (!userMessage) return;
 
@@ -9,7 +10,7 @@ async function send() {
     input.value = "";
 
     // Create initial AI bubble indicating loading state
-    const loadingDiv = appendMessage("AI", "Pensando...", "ai-msg", "loading");
+    const loadingDiv = appendMessage(AIName, "Pensando...", "ai-msg", "loading");
     
     try {
         const res = await fetch("/chat", {
@@ -24,7 +25,7 @@ async function send() {
         const decoder = new TextDecoder("utf-8");
         
         let isFirstChunk = true;
-        let fullText = "AI: ";
+        let fullText = `${AIName}: `;
 
         while (true) {
             const { value, done } = await reader.read();
@@ -45,7 +46,7 @@ async function send() {
         }
 
     } catch (error) {
-        loadingDiv.textContent = "Error: Falha na conexão com o servidor.";
+        loadingDiv.textContent = "Erro: Falha na conexão com o servidor.";
         loadingDiv.classList.remove("loading");
         loadingDiv.classList.add("error-msg");
     }
