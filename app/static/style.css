@@ -1,18 +1,139 @@
-body{
-    max-width:700px;
-    margin:auto;
-    font-family:Arial;
-    padding:30px;
+/* Basic reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-#chat{
-    height:500px;
-    overflow:auto;
-    border:1px solid #ddd;
-    padding:10px;
-    margin-bottom:10px;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e5ddd5; /* Fundo suave */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-input{
-    width:80%;
+/* Main chat window */
+.app-container {
+    width: 100%;
+    max-width: 800px;
+    height: 90vh;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-header {
+    background-color: #075e54;
+    color: white;
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Message area */
+.chat-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: #efeae2;
+}
+
+/* Chat bubble styling */
+.chat-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 1rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* User message alignment and color */
+.user-msg {
+    align-self: flex-end;
+    background-color: #dcf8c6;
+    color: #303030;
+    border-bottom-right-radius: 4px;
+}
+
+/* AI message alignment and color */
+.ai-msg {
+    align-self: flex-start;
+    background-color: #ffffff;
+    color: #303030;
+    border-bottom-left-radius: 4px;
+}
+
+.loading {
+    font-style: italic;
+    color: #888;
+}
+
+.error-msg {
+    background-color: #ffe6e6;
+    color: #d9534f;
+    border: 1px solid #d9534f;
+}
+
+/* Input area */
+.input-container {
+    display: flex;
+    padding: 16px;
+    background: #f0f0f0;
+    border-top: 1px solid #ccc;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 24px;
+    outline: none;
+    font-size: 1rem;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+button {
+    padding: 0 24px;
+    background-color: #075e54;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #128c7e;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cccccc;
+    border-radius: 4px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
