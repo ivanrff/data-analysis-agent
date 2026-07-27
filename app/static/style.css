@@ -68,8 +68,8 @@ body {
 /* User message alignment and color */
 .user-msg {
     align-self: flex-end;
-    background-color: #dcf8c6;
-    color: #303030;
+    background-color: #f12a7c;
+    color: #ffffff; 
     border-bottom-right-radius: 4px;
 }
 
@@ -113,9 +113,10 @@ input {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Adds a soft shadow to the input itself */
 }
 
+/* Update button base color to the new theme */
 button {
     padding: 0 24px;
-    background-color: #075e54;
+    background-color: #f12a7c; 
     color: white;
     border: none;
     border-radius: 24px;
@@ -125,8 +126,9 @@ button {
     transition: background-color 0.2s;
 }
 
+/* Update button hover color to a slightly darker shade */
 button:hover {
-    background-color: #128c7e;
+    background-color: #d91a67; 
 }
 
 /* Custom scrollbar */
