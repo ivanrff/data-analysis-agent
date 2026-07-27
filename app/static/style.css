@@ -7,23 +7,24 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #e5ddd5; /* Fundo suave */
+    background-color: #f4f4f5; /* Light and clean background */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
 }
 
-/* Main chat window */
+/* Main chat window - Box styling removed, spans full height */
 .app-container {
     width: 100%;
     max-width: 800px;
-    height: 90vh;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    height: 100vh;
+    background: transparent; /* Removes the white box background */
+    border-radius: 0; /* Removes rounded corners */
+    box-shadow: none; /* Removes the shadow */
     display: flex;
     flex-direction: column;
+    justify-content: center; /* Centers the input horizontally and vertically when empty */
     overflow: hidden;
 }
 
@@ -44,7 +45,12 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background-color: #efeae2;
+    background-color: transparent; /* Removes inner background */
+}
+
+/* Hides the chat area completely if there are no messages */
+.chat-container:empty {
+    display: none;
 }
 
 /* Chat bubble styling */
@@ -90,19 +96,21 @@ body {
 .input-container {
     display: flex;
     padding: 16px;
-    background: #f0f0f0;
-    border-top: 1px solid #ccc;
+    background: transparent; /* Removes gray background */
+    border-top: none; /* Removes the top divider line */
     gap: 10px;
 }
 
+/* Enhances the input field to look like a floating pill */
 input {
     flex: 1;
-    padding: 14px 20px;
-    border: none;
+    padding: 16px 20px;
+    border: 1px solid #ddd;
     border-radius: 24px;
     outline: none;
     font-size: 1rem;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Adds a soft shadow to the input itself */
 }
 
 button {
@@ -136,4 +144,44 @@ button:hover {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------------------------------------------- */
+
+/* Markdown content styling inside bubbles */
+.chat-bubble p {
+    margin-bottom: 8px;
+}
+
+.chat-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.chat-bubble ul, .chat-bubble ol {
+    margin-left: 20px;
+    margin-bottom: 8px;
+}
+
+.chat-bubble code {
+    background-color: rgba(0, 0, 0, 0.08);
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+/* Code blocks (pre code) styling */
+.chat-bubble pre {
+    background-color: #0d1117;
+    border-radius: 6px;
+    padding: 12px;
+    overflow-x: auto;
+    margin: 8px 0;
+}
+
+.chat-bubble pre code {
+    background-color: transparent;
+    padding: 0;
+    color: #c9d1d9;
+    font-size: 0.85em;
 }

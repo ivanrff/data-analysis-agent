@@ -1,23 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assistente BB</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- Marked (Parser de Markdown) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Highlight.js (Coloração de sintaxe de código) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
 
     <div class="app-container">
-        <header class="chat-header">
+        <!-- <header class="chat-header">
             <h2>Assistente BB</h2>
-        </header>
+        </header> -->
         
         <div id="chat" class="chat-container"></div>
         
         <div class="input-container">
-            <input id="msg" type="text" placeholder="Diga o que está pensando..." autocomplete="off">
-            <button type="button" onclick="send()">Send</button>
+            <input id="msg" type="text" placeholder="Pergunte algo..." autocomplete="off">
+            <button type="button" onclick="send()">Enviar</button>
         </div>
     </div>
 

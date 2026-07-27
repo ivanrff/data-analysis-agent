@@ -1,8 +1,17 @@
+marked.setOptions({
+    highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+            return hljs.highlight(code, { language: lang }).value;
+        }
+        return hljs.highlightAuto(code).value;
+    },
+    breaks: true // Converts line breaks \n into <br> tags
+});
+
 // Async function to send the user message and process the AI response
 async function send() {
     const input = document.getElementById("msg");
     const userMessage = input.value.trim();
-    const AIName = "IA"; // You can change this to any name you want for the AI
 
     if (!userMessage) return;
 
@@ -10,7 +19,7 @@ async function send() {
     input.value = "";
 
     // Create initial AI bubble indicating loading state
-    const loadingDiv = appendMessage(AIName, "Pensando...", "ai-msg", "loading");
+    const loadingDiv = appendMessage("AI", "Pensando...", "ai-msg", "loading");
     
     try {
         const res = await fetch("/chat", {
@@ -25,7 +34,7 @@ async function send() {
         const decoder = new TextDecoder("utf-8");
         
         let isFirstChunk = true;
-        let fullText = `${AIName}: `;
+        let rawText = "";
 
         while (true) {
             const { value, done } = await reader.read();
@@ -38,8 +47,15 @@ async function send() {
                 isFirstChunk = false;
             }
 
-            fullText += chunk;
-            loadingDiv.textContent = fullText;
+            rawText += chunk;
+
+            // Render Markdown directly into HTML
+            loadingDiv.innerHTML = marked.parse(rawText);
+
+            // Re-apply highlight to code blocks created during streaming
+            loadingDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
 
             const chat = document.getElementById("chat");
             chat.scrollTop = chat.scrollHeight;
@@ -63,7 +79,8 @@ function appendMessage(sender, text, ...classNames) {
         cls.split(" ").filter(Boolean).forEach(c => msgDiv.classList.add(c));
     });
 
-    msgDiv.textContent = `${sender}: ${text}`;
+    // Handle initial rendering (Markdown for text or plain text fallback)
+    msgDiv.innerHTML = marked.parse(text);
     
     chat.appendChild(msgDiv);
     chat.scrollTop = chat.scrollHeight;
