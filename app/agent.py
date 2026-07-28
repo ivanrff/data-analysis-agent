@@ -13,6 +13,7 @@ groq_chat = ChatGroq(
     model="llama-3.3-70b-versatile",
     temperature=0,
     api_key=os.getenv('GROQ_API_KEY'),
+    max_tokens=500
 )
 
 ollama_chat = ChatOllama(
@@ -39,7 +40,7 @@ agent = create_agent(
     tools=tools,
     system_prompt=system_prompt,
     debug=True
-)
+).with_config({"recursion_limit": 5})
 
 # Store short-term memory per session
 session_store = {}
