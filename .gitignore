@@ -13,7 +13,7 @@ wheels/
 .env
 
 # Data
-# data/
+*.parquet
 
 # vector stores
-# vector_stores/
+app/rag/vectorstore/chroma/
