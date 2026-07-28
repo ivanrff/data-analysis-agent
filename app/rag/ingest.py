@@ -7,9 +7,10 @@ import pypdf
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+load_dotenv()
+
 from app.vector_store import vector_store
 
-load_dotenv()
 
 # 1. Função para carregar e quebrar PDFs
 def process_pdf_folder(folder_path: str) -> list[Document]:
