@@ -8,6 +8,14 @@ marked.setOptions({
     breaks: true // Converts line breaks \n into <br> tags
 });
 
+let currentSessionId = sessionStorage.getItem('chatSessionId');
+
+if (!currentSessionId) {
+    // Generate a random string to serve as a unique session identifier
+    currentSessionId = 'session_' + Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem('chatSessionId', currentSessionId);
+}
+
 // Async function to send the user message and process the AI response
 async function send() {
     const input = document.getElementById("msg");
@@ -25,7 +33,7 @@ async function send() {
         const res = await fetch("/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: userMessage })
+            body: JSON.stringify({ message: userMessage, session_id: currentSessionId})
         });
 
         if (!res.ok) throw new Error("Erro de conexão com o servidor.");

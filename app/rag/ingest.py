@@ -7,8 +7,7 @@ import pypdf
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from langchain_chroma import Chroma
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from app.vector_store import vector_store
 
 load_dotenv()
 
@@ -43,7 +42,7 @@ def generate_deterministic_id(doc: Document) -> str:
     raw_identifier = f"{doc.metadata['source']}_{doc.metadata['page']}_{doc.page_content}"
     return hashlib.md5(raw_identifier.encode('utf-8')).hexdigest()
 
-def sync_docs_to_db(docs_directory: str, vector_store: Chroma):
+def sync_docs_to_db(docs_directory: str, vector_store):
     # Carrega todos os PDFs da pasta
     raw_docs = process_pdf_folder(docs_directory)
     if not raw_docs:
@@ -78,20 +77,8 @@ def sync_docs_to_db(docs_directory: str, vector_store: Chroma):
     else:
         print("Todos os documentos já estão atualizados no banco (0 novos chunks).")
 
-# --- EXECUÇÃO ---
+if __name__ == "__main__":
+    # Pasta contendo os PDFs do seu projeto
+    DOCS_DIR = "app/data/docs" 
 
-embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/gemini-embedding-001",
-    google_api_key=os.getenv("GEMINI_API_KEY")
-)
-
-vector_store = Chroma(
-    collection_name="base_conhecimento",
-    embedding_function=embeddings,
-    persist_directory="app/rag/vectorstore/chroma",
-)
-
-# Pasta contendo os PDFs do seu projeto
-DOCS_DIR = "app/data/docs" 
-
-sync_docs_to_db(DOCS_DIR, vector_store)
+    sync_docs_to_db(DOCS_DIR, vector_store)
