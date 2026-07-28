@@ -65,7 +65,7 @@ def get_db_schema() -> str:
         schema_text += f"- {row['column_name']} ({row['column_type']})\n"
     return schema_text
 
-# init_db()
+init_db()
 
 if __name__ == "__main__":
     clean_csv(DATA_PATH)
