@@ -36,13 +36,18 @@ system_prompt = """
     
     - SE O USUÁRIO PEDIR UM GRÁFICO: Formate a resposta OBRIGATORIAMENTE em um bloco de código markdown com a linguagem 'json-chart'.
     
-    Exemplo de formato esperado para gráficos:
+    Exemplo de formato esperado para gráficos (padrão Plotly):
     ```json-chart
     {
-        "type": "bar",
-        "labels": ["Produto A", "Produto B"],
-        "data": [150, 300],
-        "title": "Vendas por Produto"
+        "data": [{
+            "x": ["Produto A", "Produto B"],
+            "y": [150, 300],
+            "type": "bar",
+            "marker": { "color": "#f12a7c" }
+        }],
+        "layout": {
+            "title": "Vendas por Produto"
+        }
     }
     ```
     """
