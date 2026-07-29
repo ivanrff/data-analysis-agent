@@ -4,16 +4,22 @@ import pandas as pd
 table_name_db = "tabela_vendas"
 
 def clean_csv(csv_path) -> bool:
-    data = pd.read_csv(csv_path, index_col="Row ID", sep=";")
+    data = pd.read_csv(csv_path, index_col="Row ID", sep=";", encoding_errors='replace')
 
     data.columns = [col_name.replace(" ", "_").lower() for col_name in data.columns.to_list()]
 
     for col in ["order_date", "ship_date"]:
         data[col] = pd.to_datetime(data[col].str.strip(), format="%d/%m/%Y")
 
+    last_date = max(data['order_date'].max(), data['ship_date'].max())
+
+    for col in ["order_date", "ship_date"]:
+        data[col] = data[col] + (last_date - data[col])
+
     data["sales"] = pd.to_numeric(data["sales"].str.strip().str.replace("$", "").str.replace(",", ""))
 
     data = data.sort_values(by=["ship_date"])
+    data = data.drop(columns=["month_&_year_order"])
 
     data.to_parquet("app/data/sales/sales.parquet", index=None)
 
@@ -68,4 +74,4 @@ def get_db_schema() -> str:
 init_db()
 
 if __name__ == "__main__":
-    clean_csv(DATA_PATH)
+    clean_csv("app/data/sales/sales.csv")
