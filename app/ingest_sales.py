@@ -1,5 +1,6 @@
 import duckdb
 import pandas as pd
+from datetime import datetime
 
 table_name_db = "tabela_vendas"
 
@@ -11,10 +12,18 @@ def clean_csv(csv_path) -> bool:
     for col in ["order_date", "ship_date"]:
         data[col] = pd.to_datetime(data[col].str.strip(), format="%d/%m/%Y")
 
-    last_date = max(data['order_date'].max(), data['ship_date'].max())
+    # time it takes since order to ship
+    data["ship_duration"] = data["ship_date"] - data["order_date"]
 
-    for col in ["order_date", "ship_date"]:
-        data[col] = data[col] + (last_date - data[col])
+    # pivoting order dates to 2026
+    data["order_date"] = data["order_date"].apply(lambda x: f"{x.strftime(format="%d/%m/%Y")[:-2]}26")
+    data["order_date"] = pd.to_datetime(data["order_date"].str.strip(), format="%d/%m/%Y")
+
+    # pivoting ship dates to 2026 by adding ship duration to pivoted order dates
+    data["ship_date"] = data['order_date'] + data["ship_duration"]
+
+    # removing orders made in dates in the future after pivoting every date to 2026
+    data = data[data['ship_date'] <= datetime.now()].copy()
 
     data["sales"] = pd.to_numeric(data["sales"].str.strip().str.replace("$", "").str.replace(",", ""))
 
