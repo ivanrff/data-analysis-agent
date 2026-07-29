@@ -202,3 +202,30 @@ button:hover {
     color: #c9d1d9;
     font-size: 0.85em;
 }
+
+
+/* --- Background Logo --- */
+body::after {
+    content: "";
+    position: fixed;
+    bottom: -80px; /* Pushes the image down to cut it off */
+    right: -40px;  /* Pushes the image right to cut it off */
+    width: 600px;  /* Adjust based on your logo's size */
+    height: 600px;
+    
+    /* Set the path to your logo image */
+    background-image: url('logo.png'); 
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    /* Tilts the image (adjust the degree as needed) */
+    /* transform: rotate(-25deg); */
+    
+    /* Makes the logo subtle so it doesn't distract from the chat */
+    opacity: 0.08; 
+    
+    /* Ensures the logo stays behind everything and doesn't block clicks */
+    z-index: -1;
+    pointer-events: none;
+}
