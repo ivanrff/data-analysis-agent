@@ -33,7 +33,19 @@ system_prompt = """
     - Se a pergunta exigir cálculos ou dados de tabelas -> Use `consultar_vendas_sql`.
     - Se o usuário perguntar algo fora do escopo da empresa -> Responda com seu conhecimento prévio educadamente, sem usar ferramentas.
     - NUNCA invente dados numéricos. Se a ferramenta de SQL retornar vazio, diga que não encontrou os dados na base.
-"""
+    
+    - SE O USUÁRIO PEDIR UM GRÁFICO: Formate a resposta OBRIGATORIAMENTE em um bloco de código markdown com a linguagem 'json-chart'.
+    
+    Exemplo de formato esperado para gráficos:
+    ```json-chart
+    {
+        "type": "bar",
+        "labels": ["Produto A", "Produto B"],
+        "data": [150, 300],
+        "title": "Vendas por Produto"
+    }
+    ```
+    """
 
 agent = create_agent(
     model=ollama_chat,

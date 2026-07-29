@@ -61,13 +61,15 @@ async function send() {
             loadingDiv.innerHTML = marked.parse(rawText);
 
             // Re-apply highlight to code blocks created during streaming
-            loadingDiv.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
+            // loadingDiv.querySelectorAll('pre code').forEach((block) => {
+            //     hljs.highlightElement(block);
+            // });
 
             const chat = document.getElementById("chat");
             chat.scrollTop = chat.scrollHeight;
         }
+
+        renderCharts(loadingDiv);
 
     } catch (error) {
         loadingDiv.textContent = "Erro: Falha na conexão com o servidor.";
@@ -94,6 +96,49 @@ function appendMessage(sender, text, ...classNames) {
     chat.scrollTop = chat.scrollHeight;
 
     return msgDiv; 
+}
+
+// Function to find the json-chart blocks and render them
+function renderCharts(messageElement) {
+    // Find all pre > code elements that are marked with language-json-chart
+    const codeBlocks = messageElement.querySelectorAll('code.language-json-chart');
+    
+    codeBlocks.forEach((block, index) => {
+        try {
+            // Extract and parse the JSON string
+            const chartDataConfig = JSON.parse(block.textContent);
+            
+            // Create a canvas element dynamically
+            const canvasId = 'chart_' + Date.now() + '_' + index;
+            const canvasContainer = document.createElement('div');
+            canvasContainer.innerHTML = `<canvas id="${canvasId}"></canvas>`;
+            
+            // Replace the raw JSON code block with the canvas
+            block.parentElement.replaceWith(canvasContainer);
+            
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // Instantiate the Chart.js graphic
+            new Chart(ctx, {
+                type: chartDataConfig.type || 'bar',
+                data: {
+                    labels: chartDataConfig.labels,
+                    datasets: [{
+                        label: chartDataConfig.title,
+                        data: chartDataConfig.data,
+                        backgroundColor: '#f12a7c', // Your project's primary color
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        } catch (e) {
+            console.error("Failed to parse chart JSON:", e);
+        }
+    });
 }
 
 // Allow pressing "Enter" to trigger the send function
