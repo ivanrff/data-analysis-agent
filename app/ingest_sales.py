@@ -52,7 +52,7 @@ def _get_con():
 
 def executar_query_duckdb(query: str) -> str:
     """Função auxiliar que executa a query em uma conexão isolada e segura."""
-    _con = _get_con()
+    _get_con()
 
     try:
         # Executa a query gerada pelo LLM
@@ -69,7 +69,7 @@ def executar_query_duckdb(query: str) -> str:
 
 def get_db_schema() -> str:
 
-    _con = _get_con()
+    _get_con()
 
     # Executa o DESCRIBE do DuckDB para pegar colunas e tipos automaticamente
     schema_df = _con.execute(f"DESCRIBE {table_name_db}").fetchdf()
@@ -80,7 +80,7 @@ def get_db_schema() -> str:
         schema_text += f"- {row['column_name']} ({row['column_type']})\n"
     return schema_text
 
-init_db()
+# init_db()
 
 if __name__ == "__main__":
     clean_csv("app/data/sales/sales.csv")

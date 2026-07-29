@@ -1,0 +1,19 @@
+# Cache Python
+**/__pycache__
+**/*.pyc
+
+# Dados gerados
+app/rag/vectorstore/
+app/data/sales/sales.parquet
+
+# Ambiente/versionamento
+.venv
+.git
+.gitignore
+.env
+.gitkeep
+README.md
+
+# Docker
+Dockerfile
+.dockerignore

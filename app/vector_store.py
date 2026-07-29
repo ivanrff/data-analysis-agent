@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import pypdf
 
 # Embeddings model
-from langchain_huggingface import HuggingFaceEmbeddings
+# from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_cohere import CohereEmbeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
