@@ -13,16 +13,16 @@ groq_chat = ChatGroq(
     model="llama-3.3-70b-versatile",
     temperature=0,
     api_key=os.getenv('GROQ_API_KEY'),
-    max_tokens=500
+    # max_tokens=500
 )
 
-ollama_chat = ChatOllama(
-    model="qwen3.5:latest",
-    temperature=0
-)
+# ollama_chat = ChatOllama(
+#     model="qwen3.5:latest",
+#     temperature=0
+# )
 
 system_prompt = """
-    Você é o assistente inteligente da BimBam Buy.
+    Sua tarefa é auxiliar os colaboradores internos da empresa BimBam Buy.
 
     Você possui duas fontes de informação:
     1. `buscar_docs`: Para buscar REGRAS, POLÍTICAS e TEXTOS (Ex: "Como funciona a garantia?", "Quais as formas de pagamento?").
@@ -53,7 +53,7 @@ system_prompt = """
     """
 
 agent = create_agent(
-    model=ollama_chat,
+    model=groq_chat,
     tools=tools,
     system_prompt=system_prompt,
     debug=True
