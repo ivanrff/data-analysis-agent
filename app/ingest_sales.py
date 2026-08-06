@@ -26,6 +26,8 @@ def clean_csv(csv_path) -> bool:
     data = data[data['ship_date'] <= datetime.now()].copy()
 
     data["sales"] = pd.to_numeric(data["sales"].str.strip().str.replace("$", "").str.replace(",", ""))
+    data.columns = ["value" if col == "sales" else col for col in data.columns]
+    print(data.columns)
 
     data = data.sort_values(by=["ship_date"])
     data = data.drop(columns=["month_&_year_order"])

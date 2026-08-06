@@ -10,7 +10,7 @@ from langchain_core.chat_history import InMemoryChatMessageHistory
 load_dotenv()
 
 groq_chat = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model="qwen/qwen3.6-27b",
     temperature=0,
     api_key=os.getenv('GROQ_API_KEY'),
     # max_tokens=500
@@ -31,6 +31,10 @@ system_prompt = """
     Diretrizes de Roteamento:
     - Se a pergunta for conceitual/textual -> Use `buscar_docs`.
     - Se a pergunta exigir cálculos ou dados de tabelas -> Use `consultar_vendas_sql`.
+    - Sempre formate meses usando o nome dos meses e semanas usando o nome dos dias da semana.
+    - Ao dar respostas textuais sobre receitas ou venda, formate o valor no padrão de moeda.
+    - Traduza o nome das categorias para português sempre que possível.
+
     - Se o usuário perguntar algo fora do escopo da empresa -> Responda com seu conhecimento prévio educadamente, sem usar ferramentas.
     - NUNCA invente dados numéricos. Se a ferramenta de SQL retornar vazio, diga que não encontrou os dados na base.
     
