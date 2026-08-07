@@ -4,7 +4,7 @@
 
 # Dados gerados
 app/rag/vectorstore/
-app/data/sales/sales.parquet
+app/data/sales/sales.duckdb
 
 # Ambiente/versionamento
 .venv
