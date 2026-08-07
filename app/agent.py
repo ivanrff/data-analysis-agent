@@ -6,6 +6,7 @@ import os
 from app.tools.tools import tools
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.chat_history import InMemoryChatMessageHistory
+from cachetools import TTLCache
 
 load_dotenv()
 
@@ -64,7 +65,7 @@ agent = create_agent(
 ).with_config({"recursion_limit": 5})
 
 # Store short-term memory per session
-session_store = {}
+session_store = TTLCache(maxsize=5, ttl=3600)
 
 # Retrieve or create memory for a specific user session
 def get_session_history(session_id: str) -> InMemoryChatMessageHistory:
