@@ -76,5 +76,5 @@ agent = create_agent(
     tools=tools,
     system_prompt=system_prompt,
     checkpointer=checkpointer,
-    debug=True
+    # debug=True
 )
