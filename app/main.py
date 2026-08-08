@@ -1,22 +1,29 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 load_dotenv()
 
 from app.agent import agent_with_history
 
-
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 class ChatRequest(BaseModel):
     message: str
     session_id: str = "default_session"
 
 @app.post("/chat")
-async def chat(req: ChatRequest):
+@limiter.limit("10/hour")
+async def chat(request: Request, req: ChatRequest):
     async def event_generator():
         # Change version to "v2" and remove the 'await' from the call
         stream_generator = agent_with_history.astream_events(

@@ -36,6 +36,10 @@ async function send() {
             body: JSON.stringify({ message: userMessage, session_id: currentSessionId})
         });
 
+        if (res.status === 429) {
+            throw new Error("Limite de interações atingido. Esse site é apenas para testes rápidos.");
+        }
+        
         if (!res.ok) throw new Error("Erro de conexão com o servidor.");
 
         const reader = res.body.getReader();
@@ -72,7 +76,7 @@ async function send() {
         renderCharts(loadingDiv);
 
     } catch (error) {
-        loadingDiv.textContent = "Erro: Falha na conexão com o servidor.";
+        loadingDiv.textContent = error.message;
         loadingDiv.classList.remove("loading");
         loadingDiv.classList.add("error-msg");
     }
