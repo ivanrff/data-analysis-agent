@@ -1,0 +1,5 @@
+Gere um gráfico de linhas de receita por mês
+
+Qual a categoria com maior receita no último mês?
+
+Qual o procedimento padrão para acionar a garantia?

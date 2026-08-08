@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 from app.vector_store import vector_store
 
-from app.ingest_sales import get_db_schema, table_name_db, executar_query_duckdb
+from app.ingest_sales import get_db_schema, TABLE_NAME, executar_query_duckdb
 
 load_dotenv()
 
@@ -38,7 +38,7 @@ def buscar_docs(consulta: str) -> str:
     
     NÃO USE PARA: Perguntas sobre regras, termos de uso ou políticas textuais.
     
-    Tabela disponível: `{table_name_db}`
+    Tabela disponível: `{TABLE_NAME}`
     Colunas:
     {get_db_schema()}
     

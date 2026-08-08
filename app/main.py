@@ -1,36 +1,69 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+from langgraph.errors import GraphRecursionError
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+from app.agent import touch_thread
+
 load_dotenv()
 
-from app.agent import agent_with_history
+from app.agent import agent
 
-
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 class ChatRequest(BaseModel):
     message: str
     session_id: str = "default_session"
 
 @app.post("/chat")
-async def chat(req: ChatRequest):
+@limiter.limit("10/hour")
+async def chat(request: Request, req: ChatRequest):
+    touch_thread(req.session_id)
+
     async def event_generator():
+        recursion_count = 0
         # Change version to "v2" and remove the 'await' from the call
-        stream_generator = agent_with_history.astream_events(
+        stream_generator = agent.astream_events(
             {"messages": [{"role": "user", "content": req.message}]},
-            config={"configurable": {"session_id": req.session_id}},
-            version="v2" # <--- FIXED VERSION HERE
+            config={
+                "configurable": {"thread_id": req.session_id},
+                "recursion_limit": 4
+            },
+            version="v2"
         )
-        
-        async for event in stream_generator:
-            if event["event"] == "on_chat_model_stream":
-                chunk_data = event["data"]["chunk"].content
-                
-                if chunk_data and isinstance(chunk_data, str):
-                    yield chunk_data
+        try:
+            async for event in stream_generator:
+                if event["event"] in ["on_chat_model_start", "on_tool_start"]:
+                    recursion_count += 1
+                    print(f"[DEBUG] Step {recursion_count}: {event['name']}")
+
+                if event["event"] == "on_chat_model_stream":
+                    chunk_data = event["data"]["chunk"].content
+                    if chunk_data and isinstance(chunk_data, str):
+                        yield chunk_data
+
+                elif event["event"] == "on_chat_model_end":
+                    output = event["data"].get("output")
+                    finish_reason = None
+                    if output is not None:
+                        finish_reason = getattr(output, "response_metadata", {}).get("finish_reason")
+                    if finish_reason == "length":
+                        yield "\n\n[[LIMIT:MAX_TOKENS]]"
+
+        except GraphRecursionError:
+            yield "\n\n[[LIMIT:RECURSION]]"
+
+        print(f"[METRICS] Total agent steps for session {req.session_id}: {recursion_count}")
 
     return StreamingResponse(event_generator(), media_type="text/plain; charset=utf-8")
 

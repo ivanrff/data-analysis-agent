@@ -1,19 +1,19 @@
 from langchain.agents import create_agent
 from langchain_groq import ChatGroq
-from langchain_ollama import ChatOllama
+# from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
 import os
 from app.tools.tools import tools
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.chat_history import InMemoryChatMessageHistory
+from langgraph.checkpoint.memory import InMemorySaver
+from collections import OrderedDict
 
 load_dotenv()
 
 groq_chat = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model="qwen/qwen3.6-27b",
     temperature=0,
     api_key=os.getenv('GROQ_API_KEY'),
-    # max_tokens=500
+    max_tokens=1000
 )
 
 # ollama_chat = ChatOllama(
@@ -31,6 +31,10 @@ system_prompt = """
     Diretrizes de Roteamento:
     - Se a pergunta for conceitual/textual -> Use `buscar_docs`.
     - Se a pergunta exigir cálculos ou dados de tabelas -> Use `consultar_vendas_sql`.
+    - Sempre formate meses usando o nome dos meses e semanas usando o nome dos dias da semana.
+    - Ao dar respostas textuais sobre receitas ou venda, formate o valor no padrão de moeda.
+    - Traduza o nome das categorias para português sempre que possível.
+
     - Se o usuário perguntar algo fora do escopo da empresa -> Responda com seu conhecimento prévio educadamente, sem usar ferramentas.
     - NUNCA invente dados numéricos. Se a ferramenta de SQL retornar vazio, diga que não encontrou os dados na base.
     
@@ -52,26 +56,25 @@ system_prompt = """
     ```
     """
 
+MAX_SESSIONS = 5  # limite de conversas simultâneas guardadas em memória
+
+checkpointer = InMemorySaver()
+active_threads = OrderedDict()  # controla quais threads estão "vivas"
+
+def touch_thread(thread_id: str):
+    """Marca a thread como usada recentemente; remove a mais antiga se estourar o limite."""
+    if thread_id in active_threads:
+        active_threads.move_to_end(thread_id)
+    else:
+        active_threads[thread_id] = True
+        if len(active_threads) > MAX_SESSIONS:
+            oldest_id, _ = active_threads.popitem(last=False)
+            checkpointer.delete_thread(oldest_id)
+
 agent = create_agent(
     model=groq_chat,
     tools=tools,
     system_prompt=system_prompt,
-    debug=True
-).with_config({"recursion_limit": 5})
-
-# Store short-term memory per session
-session_store = {}
-
-# Retrieve or create memory for a specific user session
-def get_session_history(session_id: str) -> InMemoryChatMessageHistory:
-    if session_id not in session_store:
-        session_store[session_id] = InMemoryChatMessageHistory()
-    return session_store[session_id]
-
-# Wrap the base agent with the history manager
-agent_with_history = RunnableWithMessageHistory(
-    agent,
-    get_session_history,
-    input_messages_key="messages", 
-    # history_messages_key="chat_history" # Uncomment if your agent explicitly expects a different key for history
+    checkpointer=checkpointer,
+    # debug=True
 )

@@ -11,7 +11,6 @@ import pypdf
 # Embeddings model
 # from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_cohere import CohereEmbeddings
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 # Vector Store Engine
 from langchain_chroma import Chroma

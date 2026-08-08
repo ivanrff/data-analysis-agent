@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-if [ ! -f "app/data/sales/sales.parquet" ]; then
-    echo "Gerando sales.parquet..."
+if [ ! -f "app/data/sales/sales.duckdb" ]; then
+    echo "Gerando sales.duckdb..."
     python -m app.ingest_sales
 fi
 

@@ -1,14 +1,23 @@
 import duckdb
 import pandas as pd
 from datetime import datetime
+from pathlib import Path
+import numpy as np
 
-table_name_db = "tabela_vendas"
+CSV_PATH = "app/data/sales/sales.csv"
+DB_PATH = "app/data/sales/sales.duckdb"
+TABLE_NAME = "tabela_vendas"
 
-def clean_csv(csv_path) -> bool:
+def create_ingest_db(csv_path) -> bool:
+    # making sure the path exists
+    Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+
     data = pd.read_csv(csv_path, index_col="Row ID", sep=";", encoding_errors='replace')
 
+    # standardizing column names
     data.columns = [col_name.replace(" ", "_").lower() for col_name in data.columns.to_list()]
 
+    # making dates as date type
     for col in ["order_date", "ship_date"]:
         data[col] = pd.to_datetime(data[col].str.strip(), format="%d/%m/%Y")
 
@@ -27,52 +36,46 @@ def clean_csv(csv_path) -> bool:
 
     data["sales"] = pd.to_numeric(data["sales"].str.strip().str.replace("$", "").str.replace(",", ""))
 
-    data = data.sort_values(by=["ship_date"])
+    # making the sales values more interesting to visualize
+    data["sales"] = data["sales"] + np.around(np.random.uniform(low=0.01, high=0.99, size=len(data)), 2)
+
+    # renaming "sales" column to "value" so the LLM understands better what it is
+    data.columns = ["value" if col == "sales" else col for col in data.columns]
+
+    # dropping this column that formats the month as a string using month names
     data = data.drop(columns=["month_&_year_order"])
 
-    data.to_parquet("app/data/sales/sales.parquet", index=None)
+    data = data.sort_values(by=["ship_date"])
+
+    ingest_con = duckdb.connect(DB_PATH)
+    ingest_con.sql(f"CREATE OR REPLACE TABLE {TABLE_NAME} AS SELECT * FROM data")
+    ingest_con.close()
 
     return True
-    
-
-# 1. Caminho para os seus dados (pode ser .csv, .parquet ou .db)
-DATA_PATH = "app/data/sales/sales.parquet"
-
-_con = None
-
-def init_db():
-    global _con
-    _con = duckdb.connect(database=":memory:", read_only=False)
-    _con.execute(f"CREATE VIEW {table_name_db} AS SELECT * FROM read_parquet('{DATA_PATH}')")
-
-def _get_con():
-    if _con is None:
-        init_db()
-    return _con
 
 def executar_query_duckdb(query: str) -> str:
     """Função auxiliar que executa a query em uma conexão isolada e segura."""
-    _get_con()
 
     try:
-        # Executa a query gerada pelo LLM
-        result = _con.execute(query).fetchdf()
-        
-        # Limita o retorno visual para evitar estourar o limite de tokens da API
-        if len(result) > 50:
-            return f"{result.head(50).to_string()}\n\n... (Exibindo 50 de {len(result)} linhas)"
-        
-        return result.to_string() if not result.empty else "Consulta retornou 0 resultados."
+        with duckdb.connect(DB_PATH, read_only=True, config={"enable_external_access": False}) as con:
+            result = con.execute(query).fetchdf()
+            
+            # Limita o retorno visual para evitar estourar o limite de tokens da API
+            if len(result) > 50:
+                return f"{result.head(50).to_string()}\n\n... (Exibindo 50 de {len(result)} linhas)"
+            
+            return result.to_string() if not result.empty else "Consulta retornou 0 resultados."
         
     except Exception as e:
         return f"Erro ao executar SQL no DuckDB: {str(e)}"
 
 def get_db_schema() -> str:
 
-    _get_con()
+    con = duckdb.connect(DB_PATH, read_only=True, config={"enable_external_access": False})
 
     # Executa o DESCRIBE do DuckDB para pegar colunas e tipos automaticamente
-    schema_df = _con.execute(f"DESCRIBE {table_name_db}").fetchdf()
+    schema_df = con.execute(f"DESCRIBE {TABLE_NAME}").fetchdf()
+    con.close()
     
     # Formata como texto simples
     schema_text = ""
@@ -80,7 +83,7 @@ def get_db_schema() -> str:
         schema_text += f"- {row['column_name']} ({row['column_type']})\n"
     return schema_text
 
-# init_db()
-
 if __name__ == "__main__":
-    clean_csv("app/data/sales/sales.csv")
+    create_ingest_db(CSV_PATH)
+    print(executar_query_duckdb(f"SELECT * FROM {TABLE_NAME} LIMIT 5"))
+    print(get_db_schema())
