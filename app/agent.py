@@ -14,7 +14,7 @@ groq_chat = ChatGroq(
     model="qwen/qwen3.6-27b",
     temperature=0,
     api_key=os.getenv('GROQ_API_KEY'),
-    # max_tokens=500
+    max_tokens=1000
 )
 
 # ollama_chat = ChatOllama(
