@@ -4,6 +4,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+from langgraph.errors import GraphRecursionError
+
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -39,16 +41,27 @@ async def chat(request: Request, req: ChatRequest):
             },
             version="v2"
         )
+        try:
+            async for event in stream_generator:
+                if event["event"] in ["on_chat_model_start", "on_tool_start"]:
+                    recursion_count += 1
+                    print(f"[DEBUG] Step {recursion_count}: {event['name']}")
 
-        async for event in stream_generator:
-            if event["event"] in ["on_chat_model_start", "on_tool_start"]:
-                recursion_count += 1
-                print(f"[DEBUG] Step {recursion_count}: {event['name']}")
+                if event["event"] == "on_chat_model_stream":
+                    chunk_data = event["data"]["chunk"].content
+                    if chunk_data and isinstance(chunk_data, str):
+                        yield chunk_data
 
-            if event["event"] == "on_chat_model_stream":
-                chunk_data = event["data"]["chunk"].content
-                if chunk_data and isinstance(chunk_data, str):
-                    yield chunk_data
+                elif event["event"] == "on_chat_model_end":
+                    output = event["data"].get("output")
+                    finish_reason = None
+                    if output is not None:
+                        finish_reason = getattr(output, "response_metadata", {}).get("finish_reason")
+                    if finish_reason == "length":
+                        yield "\n\n[[LIMIT:MAX_TOKENS]]"
+
+        except GraphRecursionError:
+            yield "\n\n[[LIMIT:RECURSION]]"
 
         print(f"[METRICS] Total agent steps for session {req.session_id}: {recursion_count}")
 

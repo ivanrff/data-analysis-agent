@@ -73,6 +73,24 @@ async function send() {
             chat.scrollTop = chat.scrollHeight;
         }
 
+        let limitWarning = null;
+        if (rawText.includes("[[LIMIT:MAX_TOKENS]]")) {
+            rawText = rawText.replace("[[LIMIT:MAX_TOKENS]]", "");
+            limitWarning = "Resposta cortada: atingiu o limite máximo de tokens. Esse projeto tem limites rigorosos pois utiliza do nível gratuito da API Groq. Tente fazer perguntas mais simples.";
+        } else if (rawText.includes("[[LIMIT:RECURSION]]")) {
+            rawText = rawText.replace("[[LIMIT:RECURSION]]", "");
+            limitWarning = "O agente atingiu o limite de passos (recursion limit) antes de terminar. Esse projeto tem limites rigorosos pois utiliza do nível gratuito da API Groq. Tente fazer perguntas mais simples.";
+        }
+
+        loadingDiv.innerHTML = marked.parse(rawText);
+
+        if (limitWarning) {
+            const warningDiv = document.createElement("div");
+            warningDiv.className = "limit-warning";
+            warningDiv.textContent = limitWarning;
+            loadingDiv.appendChild(warningDiv);
+        }
+
         renderCharts(loadingDiv);
 
     } catch (error) {

@@ -229,3 +229,10 @@ body::after {
     z-index: -1;
     pointer-events: none;
 }
+
+.limit-warning {
+    margin-top: 8px;
+    color: #d9534f;
+    font-weight: bold;
+    font-style: italic;
+}
