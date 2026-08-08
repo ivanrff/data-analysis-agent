@@ -1,12 +1,10 @@
 from langchain.agents import create_agent
 from langchain_groq import ChatGroq
-from langchain_ollama import ChatOllama
+# from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
 import os
 from app.tools.tools import tools
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.chat_history import InMemoryChatMessageHistory
-from cachetools import TTLCache
+from langgraph.checkpoint.memory import InMemorySaver
 
 load_dotenv()
 
@@ -57,26 +55,13 @@ system_prompt = """
     ```
     """
 
+# O checkpointer guarda o histórico por thread_id — troca só quando o processo reinicia
+checkpointer = InMemorySaver()
+
 agent = create_agent(
     model=groq_chat,
     tools=tools,
     system_prompt=system_prompt,
-    # debug=True
-).with_config({"recursion_limit": 1})
-
-# Store short-term memory per session
-session_store = TTLCache(maxsize=5, ttl=3600)
-
-# Retrieve or create memory for a specific user session
-def get_session_history(session_id: str) -> InMemoryChatMessageHistory:
-    if session_id not in session_store:
-        session_store[session_id] = InMemoryChatMessageHistory()
-    return session_store[session_id]
-
-# Wrap the base agent with the history manager
-agent_with_history = RunnableWithMessageHistory(
-    agent,
-    get_session_history,
-    input_messages_key="messages", 
-    # history_messages_key="chat_history" # Uncomment if your agent explicitly expects a different key for history
+    checkpointer=checkpointer,
+    debug=True
 )

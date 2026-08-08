@@ -10,7 +10,7 @@ from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
-from app.agent import agent_with_history
+from app.agent import agent
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
@@ -27,10 +27,10 @@ async def chat(request: Request, req: ChatRequest):
     async def event_generator():
         recursion_count = 0
         # Change version to "v2" and remove the 'await' from the call
-        stream_generator = agent_with_history.astream_events(
+        stream_generator = agent.astream_events(
             {"messages": [{"role": "user", "content": req.message}]},
             config={
-                "configurable": {"session_id": req.session_id},
+                "configurable": {"thread_id": req.session_id},
                 "recursion_limit": 4
             },
             version="v2"
