@@ -8,6 +8,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
+from app.agent import touch_thread
+
 load_dotenv()
 
 from app.agent import agent
@@ -24,6 +26,8 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 @limiter.limit("10/hour")
 async def chat(request: Request, req: ChatRequest):
+    touch_thread(req.session_id)
+
     async def event_generator():
         recursion_count = 0
         # Change version to "v2" and remove the 'await' from the call

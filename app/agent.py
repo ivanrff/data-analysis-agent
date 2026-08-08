@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 from app.tools.tools import tools
 from langgraph.checkpoint.memory import InMemorySaver
+from collections import OrderedDict
 
 load_dotenv()
 
@@ -55,8 +56,20 @@ system_prompt = """
     ```
     """
 
-# O checkpointer guarda o histórico por thread_id — troca só quando o processo reinicia
+MAX_SESSIONS = 5  # limite de conversas simultâneas guardadas em memória
+
 checkpointer = InMemorySaver()
+active_threads = OrderedDict()  # controla quais threads estão "vivas"
+
+def touch_thread(thread_id: str):
+    """Marca a thread como usada recentemente; remove a mais antiga se estourar o limite."""
+    if thread_id in active_threads:
+        active_threads.move_to_end(thread_id)
+    else:
+        active_threads[thread_id] = True
+        if len(active_threads) > MAX_SESSIONS:
+            oldest_id, _ = active_threads.popitem(last=False)
+            checkpointer.delete_thread(oldest_id)
 
 agent = create_agent(
     model=groq_chat,
