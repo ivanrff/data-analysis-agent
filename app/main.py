@@ -25,19 +25,28 @@ class ChatRequest(BaseModel):
 @limiter.limit("10/hour")
 async def chat(request: Request, req: ChatRequest):
     async def event_generator():
+        recursion_count = 0
         # Change version to "v2" and remove the 'await' from the call
         stream_generator = agent_with_history.astream_events(
             {"messages": [{"role": "user", "content": req.message}]},
-            config={"configurable": {"session_id": req.session_id}},
-            version="v2" # <--- FIXED VERSION HERE
+            config={
+                "configurable": {"session_id": req.session_id},
+                "recursion_limit": 4
+            },
+            version="v2"
         )
-        
+
         async for event in stream_generator:
+            if event["event"] in ["on_chat_model_start", "on_tool_start"]:
+                recursion_count += 1
+                print(f"[DEBUG] Step {recursion_count}: {event['name']}")
+
             if event["event"] == "on_chat_model_stream":
                 chunk_data = event["data"]["chunk"].content
-                
                 if chunk_data and isinstance(chunk_data, str):
                     yield chunk_data
+
+        print(f"[METRICS] Total agent steps for session {req.session_id}: {recursion_count}")
 
     return StreamingResponse(event_generator(), media_type="text/plain; charset=utf-8")
 

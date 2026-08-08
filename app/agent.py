@@ -61,8 +61,8 @@ agent = create_agent(
     model=groq_chat,
     tools=tools,
     system_prompt=system_prompt,
-    debug=True
-).with_config({"recursion_limit": 5})
+    # debug=True
+).with_config({"recursion_limit": 1})
 
 # Store short-term memory per session
 session_store = TTLCache(maxsize=5, ttl=3600)
