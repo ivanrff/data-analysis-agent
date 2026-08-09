@@ -5,3 +5,6 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    volumes:
+      - ./app/data:/app/app/data
+      - ./app/rag/vectorstore:/app/app/rag/vectorstore
