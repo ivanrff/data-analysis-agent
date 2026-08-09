@@ -116,3 +116,7 @@ The system orchestrator is defined in the `agent.py` file. Based on the user's i
 - **LangChain:** The agent was designed using best practices suggested by the LangChain docs after v1 changes, like using checkpointer for message history and the `create_agent` module.
 - **Agent Memory:** In-memory storage that holds a limited amount of thread ids, and with the agent.touch_thread() function I can control the number of threads to mitigate memory leaks over time.
 - **Agent Security & Safety:** Database connections to DuckDB are strictly set to `read_only` with host file-system access disabled, preventing unauthorized schema mutations or file access during text-to-SQL execution.
+
+## Chat Screenshot [pt-BR]
+
+![](working-app-example.png)
