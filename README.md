@@ -2,7 +2,7 @@
 
 An intelligent virtual assistant developed to help internal employees at a ficticial e-commerce called **BimBam Buy**. This project uses **LLMs (Large Language Models)** to answer textual questions based on corporate documents (such as policies and manuals) via **RAG (Retrieval-Augmented Generation)**, and performs analytical queries on data and metrics through **Text-to-SQL** in a high-performance database.
 
-**Deployment Note:** This project was deployed on Oracle and can be accessed [here](http://163.176.57.167:8000/).
+**Deployment Note:** [CLICK HERE TO ACCESS THE WEBSITE](http://163.176.57.167:8000/).
 
 ## Table of Contents
 - [Key Features](#key-features)
@@ -15,6 +15,7 @@ An intelligent virtual assistant developed to help internal employees at a ficti
   - [3. Running Locally (Development Mode)](#3-running-locally-development-mode)
 - [How the Agent Works (Core)](#how-the-agent-works-core)
 - [Some Design Choices](#some-design-choices)
+- [Chat ScreenShot](#chat-screenshot-pt-br)
 
 ## Key Features
 - **Dual-Engine Querying:** 
